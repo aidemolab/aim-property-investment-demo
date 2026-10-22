@@ -3,7 +3,7 @@ import { Property, CalculatedProperty } from './types';
 export const rawProperties: Property[] = [
   {
     id: 'P001',
-    address: '14 Hartley Road, Manchester',
+    address: '14 Specimen Road, Manchester',
     type: 'Residential Terraced',
     region: 'North West',
     askingPrice: 185000,
@@ -19,7 +19,7 @@ export const rawProperties: Property[] = [
   },
   {
     id: 'P002',
-    address: 'Apt 7 Riverside Court, Leeds',
+    address: 'Apt 7 Sample Court, Leeds',
     type: 'Residential Apartment',
     region: 'Yorkshire',
     askingPrice: 162000,
@@ -35,7 +35,7 @@ export const rawProperties: Property[] = [
   },
   {
     id: 'P003',
-    address: 'Unit 4 Parkside Business Centre, Birmingham',
+    address: 'Unit 4 Example Business Centre, Birmingham',
     type: 'Commercial Unit',
     region: 'West Midlands',
     askingPrice: 275000,
@@ -51,7 +51,7 @@ export const rawProperties: Property[] = [
   },
   {
     id: 'P004',
-    address: '22 Elmwood Avenue, Bristol',
+    address: '22 Demo Avenue, Bristol',
     type: 'Residential Terraced',
     region: 'South West',
     askingPrice: 220000,
@@ -67,7 +67,7 @@ export const rawProperties: Property[] = [
   },
   {
     id: 'P005',
-    address: 'Flat 12 The Grange, London',
+    address: 'Flat 12 The Illustration, London',
     type: 'Residential Apartment',
     region: 'London',
     askingPrice: 485000,
@@ -83,7 +83,7 @@ export const rawProperties: Property[] = [
   },
   {
     id: 'P006',
-    address: '8 Station Road, Newcastle',
+    address: '8 Placeholder Road, Newcastle',
     type: 'Residential Terraced',
     region: 'North East',
     askingPrice: 128000,

@@ -24,6 +24,9 @@ export interface CalculatedProperty extends Property {
   netAnnualProfit: number;
   netYield: number;
   priceDiff: number; // asking - market
+  annualInterest: number; // mortgage interest (interest-only) in the what-if view; 0 for a cash purchase
+  monthlyCashFlow: number; // net annual profit / 12
+  roi: number; // net annual profit / cash invested (deposit when financed, price when cash)
   score: 'GREEN' | 'YELLOW' | 'RED';
   rank: number;
   advisorRecommendation: string;

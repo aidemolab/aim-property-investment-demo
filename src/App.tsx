@@ -1,7 +1,10 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Fragment } from 'react';
 import { 
   getCalculatedProperties, 
-  rawProperties 
+  rawProperties, 
+  DEFAULT_PROPERTY_SCENARIO, 
+  isDefaultPropertyScenario, 
+  PropertyScenario 
 } from './data';
 import { CalculatedProperty, Property } from './types';
 import { 
@@ -25,6 +28,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useDemoRows, type Row } from './demoApi';
+import { AnimatedNumber, ResultTile, ScenarioPanel, SliderField, type Preset } from './Scenario';
 import { DemoNote, DemoToolbar, RecordModal, ConfirmModal, OwnRowActions, OwnTag, type FieldDef } from './DemoUI';
 
 // ---- Live data: rows come from the database; the bundled sample rows are the offline fallback ----
@@ -66,10 +70,32 @@ const PROPERTY_FIELDS: FieldDef[] = [
 
 type FormState = { mode: 'add' } | { mode: 'edit'; property: CalculatedProperty } | { mode: 'delete'; property: CalculatedProperty } | null;
 
+// ---- What-if scenario (view only; never saved) ----
+const SCN_PRESETS: (Preset & { scn: PropertyScenario })[] = [
+  { id: 'rates-up', label: 'Interest rates +2%', hint: 'A 25% deposit mortgage at 7%', scn: { financed: true, rate: 7, deposit: 25, rentChange: 0, emptyMonths: 0 } },
+  { id: 'aggressive-growth', label: 'Aggressive growth', hint: 'Cheap money, a 20% deposit and rents up 12%', scn: { financed: true, rate: 3.5, deposit: 20, rentChange: 12, emptyMonths: 0 } },
+  { id: 'rent-downturn', label: 'Rent downturn', hint: 'Rents down 15% and three empty months, on a 50% deposit', scn: { financed: true, rate: 4.5, deposit: 50, rentChange: -15, emptyMonths: 3 } },
+];
+
 export default function App() {
   // Load calculated property data
   const demo = useDemoRows('properties', FALLBACK_ROWS);
-  const initialProperties = useMemo(() => getCalculatedProperties(demo.rows.map(propertyFromRow)), [demo.rows]);
+  const [scn, setScn] = useState<PropertyScenario>(DEFAULT_PROPERTY_SCENARIO);
+  const [preset, setPreset] = useState<string | null>(null);
+  const scnActive = !isDefaultPropertyScenario(scn);
+  const initialProperties = useMemo(() => getCalculatedProperties(demo.rows.map(propertyFromRow), scn), [demo.rows, scn]);
+  const baseline = useMemo(() => getCalculatedProperties(demo.rows.map(propertyFromRow)), [demo.rows]);
+  const baseRank = useMemo(() => new Map(baseline.map((b) => [b.id, b.rank])), [baseline]);
+  const total = (list: CalculatedProperty[], f: (x: CalculatedProperty) => number) => list.reduce((a, x) => a + f(x), 0);
+  const monthlyNow = total(initialProperties, (x) => x.monthlyCashFlow);
+  const monthlyBase = total(baseline, (x) => x.monthlyCashFlow);
+  const roiNow = initialProperties.length ? total(initialProperties, (x) => x.roi) / initialProperties.length : 0;
+  const roiBase = baseline.length ? total(baseline, (x) => x.roi) / baseline.length : 0;
+  const greenNow = initialProperties.filter((x) => x.score === 'GREEN').length;
+  const greenBase = baseline.filter((x) => x.score === 'GREEN').length;
+  const redNow = initialProperties.filter((x) => x.score === 'RED').length;
+  const redBase = baseline.filter((x) => x.score === 'RED').length;
+  const setScenario = (next: PropertyScenario, presetId: string | null = null) => { setScn(next); setPreset(presetId); };
   const [form, setForm] = useState<FormState>(null);
 
   // Filter states
@@ -214,7 +240,7 @@ export default function App() {
                   Portfolio Analysed
                 </span>
                 <div className="text-2xl sm:text-3xl font-bold text-[#0B1F33] mt-1">
-                  {counts.total}
+                  <AnimatedNumber value={counts.total} />
                 </div>
                 <p className="text-[11px] text-[#6b7280] mt-1">Mixed Residential/Commercial</p>
               </div>
@@ -230,7 +256,7 @@ export default function App() {
                   Strong (Green)
                 </span>
                 <div className="text-2xl sm:text-3xl font-bold text-[#166534] mt-1 flex items-baseline gap-2">
-                  {counts.green}
+                  <AnimatedNumber value={counts.green} />
                   <span className="text-xs font-normal text-[#166534] bg-[#dcfce7] px-2 py-0.5 rounded-full border border-[#86efac]">
                     Buy signal
                   </span>
@@ -249,7 +275,7 @@ export default function App() {
                   Caution (Yellow)
                 </span>
                 <div className="text-2xl sm:text-3xl font-bold text-[#854d0e] mt-1 flex items-baseline gap-2">
-                  {counts.yellow}
+                  <AnimatedNumber value={counts.yellow} />
                   <span className="text-xs font-normal text-[#854d0e] bg-[#fef9c3] px-2 py-0.5 rounded-full border border-[#fde047]">
                     Hold/Negotiate
                   </span>
@@ -268,7 +294,7 @@ export default function App() {
                   Avoid (Red)
                 </span>
                 <div className="text-2xl sm:text-3xl font-bold text-[#991b1b] mt-1 flex items-baseline gap-2">
-                  {counts.red}
+                  <AnimatedNumber value={counts.red} />
                   <span className="text-xs font-normal text-[#991b1b] bg-[#fee2e2] px-2 py-0.5 rounded-full border border-[#fca5a5]">
                     High Risk
                   </span>
@@ -282,6 +308,40 @@ export default function App() {
 
           </div>
         </header>
+
+        <div className="mb-6">
+          <ScenarioPanel
+            title="Run the numbers"
+            subtitle="Finance the portfolio with a mortgage, move rents and add empty months. Cash flow, yield, ROI and every property's Green, Yellow or Red rating recompute instantly."
+            presets={SCN_PRESETS} activePreset={preset}
+            onPreset={(id) => { const p = SCN_PRESETS.find((x) => x.id === id); if (p) setScenario(p.scn, id); }}
+            onReset={() => setScenario(DEFAULT_PROPERTY_SCENARIO)} changed={scnActive}
+            note="How it works: the mortgage is interest-only, so annual interest = price x (1 - deposit) x rate, and ROI = annual cash flow / the deposit you put in (or the full price for a cash purchase). Empty months remove rent. The existing Green, Yellow and Red rules then run on these figures. Illustrative only, with fictional properties. Not investment advice."
+            results={<>
+              <ResultTile testId="tile-cashflow" label="Portfolio cash flow per month" value={monthlyNow} format={formatGBP} delta={monthlyNow - monthlyBase} goodWhen="up" tone="navy" />
+              <ResultTile testId="tile-roi" label="Average ROI" value={roiNow} format={(n) => n.toFixed(1) + '%'} delta={roiNow - roiBase} deltaFormat={(n) => n.toFixed(1) + ' pts'} goodWhen="up" tone="amber" />
+              <ResultTile testId="tile-green" label="Green properties" value={greenNow} format={(n) => String(Math.round(n))} delta={greenNow - greenBase} deltaFormat={(n) => String(Math.round(n))} goodWhen="up" tone="green" />
+              <ResultTile testId="tile-red" label="Red properties" value={redNow} format={(n) => String(Math.round(n))} delta={redNow - redBase} deltaFormat={(n) => String(Math.round(n))} goodWhen="down" tone="red" />
+            </>}
+          >
+            <div className="scn-body two">
+              <div className="scn-group">
+                <h3>Finance</h3>
+                <label className="scn-toggle" htmlFor="financed">
+                  <input id="financed" type="checkbox" checked={scn.financed} onChange={(e) => setScenario({ ...scn, financed: e.target.checked })} />
+                  <span>Buy with an interest-only mortgage (off = cash purchase)</span>
+                </label>
+                <SliderField id="rate" label="Mortgage rate" value={scn.rate} min={2} max={9} step={0.1} format={(v) => `${v.toFixed(1)}%`} onChange={(v) => setScenario({ ...scn, financed: true, rate: v })} />
+                <SliderField id="deposit" label="Deposit" value={scn.deposit} min={10} max={50} step={1} format={(v) => `${v}%`} onChange={(v) => setScenario({ ...scn, financed: true, deposit: v })} />
+              </div>
+              <div className="scn-group">
+                <h3>Income</h3>
+                <SliderField id="rentChange" label="Rent change" value={scn.rentChange} min={-20} max={20} step={1} format={(v) => `${v > 0 ? '+' : ''}${v}%`} onChange={(v) => setScenario({ ...scn, rentChange: v })} />
+                <SliderField id="empty" label="Empty months per year" value={scn.emptyMonths} min={0} max={6} step={0.5} format={(v) => `${v} months`} onChange={(v) => setScenario({ ...scn, emptyMonths: v })} />
+              </div>
+            </div>
+          </ScenarioPanel>
+        </div>
 
         <div className="mb-6">
           <DemoToolbar
@@ -423,6 +483,12 @@ export default function App() {
                   <th className="py-4 px-4 font-sans text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold text-right w-[120px]">
                     Net Profit
                   </th>
+                  <th className="py-4 px-4 font-sans text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold text-right w-[120px]">
+                    Cash Flow / mo
+                  </th>
+                  <th className="py-4 px-3 font-sans text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold text-right w-[90px]">
+                    ROI
+                  </th>
                   <th className="py-4 px-4 font-sans text-[11px] uppercase tracking-wider text-[#6b7280] font-semibold">
                     Risk Flags
                   </th>
@@ -432,7 +498,7 @@ export default function App() {
               <tbody className="divide-y divide-[#e2e8f0]">
                 {filteredProperties.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="text-center py-12 text-[#6b7280] font-medium bg-white">
+                    <td colSpan={13} className="text-center py-12 text-[#6b7280] font-medium bg-white">
                       No properties found matching the selected filter.
                     </td>
                   </tr>
@@ -456,9 +522,9 @@ export default function App() {
                     const isEqualMarket = p.priceDiff === 0;
 
                     return (
-                      <>
+                      <Fragment key={p.id}>
                         {/* Main Row */}
-                        <tr
+                        <motion.tr layout="position" transition={{ type: 'spring', stiffness: 300, damping: 32 }}
                           key={p.id}
                           onClick={() => handleRowClick(p.id)}
                           className={`hover:bg-[#f0f4ff] transition-all cursor-pointer ${
@@ -470,6 +536,9 @@ export default function App() {
                             <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#f4f6f9] text-[#0B1F33] font-semibold text-xs border border-[#e2e8f0]">
                               {p.rank}
                             </span>
+                            {scnActive && baseRank.get(p.id) !== undefined && baseRank.get(p.id) !== p.rank && (
+                              <span className={`rank-chip ${p.rank < (baseRank.get(p.id) ?? 0) ? 'up' : 'down'}`} title="Rank change versus the baseline">{p.rank < (baseRank.get(p.id) ?? 0) ? '▲' : '▼'}{Math.abs(p.rank - (baseRank.get(p.id) ?? 0))}</span>
+                            )}
                           </td>
 
                           {/* Shortened Address */}
@@ -496,7 +565,7 @@ export default function App() {
 
                           {/* Score Badge */}
                           <td className="py-4 px-3 text-center">
-                            <span className={`inline-block px-2.5 py-1 text-[11px] font-semibold rounded-full border ${scoreBadgeClass}`}>
+                            <span className={`tier-badge inline-block px-2.5 py-1 text-[11px] font-semibold rounded-full border ${scoreBadgeClass}`}>
                               {p.score}
                             </span>
                           </td>
@@ -527,18 +596,29 @@ export default function App() {
 
                           {/* Gross Yield */}
                           <td className="py-4 px-3 text-right font-mono font-medium text-[13px] text-[#0B1F33]">
-                            {formatPercent(p.grossYield)}
+                            <AnimatedNumber value={p.grossYield} format={formatPercent} duration={0.5} />
                           </td>
 
                           {/* Net Yield */}
                           <td className="py-4 px-3 text-right font-mono font-medium text-[13px] text-[#0B1F33]">
-                            {formatPercent(p.netYield)}
+                            <AnimatedNumber value={p.netYield} format={formatPercent} duration={0.5} />
                           </td>
 
                           {/* Net Annual Profit */}
                           <td className="py-4 px-4 text-right font-semibold text-[13px] text-[#0B1F33]">
-                            {formatGBP(p.netAnnualProfit)}
+                            <AnimatedNumber value={p.netAnnualProfit} format={formatGBP} duration={0.5} />
                             <span className="text-[10px] text-[#6b7280] font-normal block">/ yr</span>
+                          </td>
+
+                          {/* Monthly cash flow (scenario aware) */}
+                          <td className={`py-4 px-4 text-right font-semibold text-[13px] ${p.monthlyCashFlow < 0 ? 'text-[#991b1b]' : 'text-[#166534]'}`} data-testid={`cashflow-${p.id}`}>
+                            <AnimatedNumber value={p.monthlyCashFlow} format={formatGBP} duration={0.5} />
+                            <span className="text-[10px] text-[#6b7280] font-normal block">/ month</span>
+                          </td>
+
+                          {/* ROI */}
+                          <td className={`py-4 px-3 text-right font-mono font-medium text-[13px] ${p.roi < 0 ? 'text-[#991b1b]' : 'text-[#0B1F33]'}`}>
+                            <AnimatedNumber value={p.roi} format={(n) => n.toFixed(1) + '%'} duration={0.5} />
                           </td>
 
                           {/* Risk Flags */}
@@ -566,11 +646,11 @@ export default function App() {
                               <ChevronDown className="w-4 h-4 text-[#6b7280]" />
                             )}
                           </td>
-                        </tr>
+                        </motion.tr>
 
                         {/* Expandable Detail Panel */}
                         <tr key={`${p.id}-detail`}>
-                          <td colSpan={11} className="p-0 border-none">
+                          <td colSpan={13} className="p-0 border-none">
                             <AnimatePresence initial={false}>
                               {isExpanded && (
                                 <motion.div
@@ -818,7 +898,7 @@ export default function App() {
                             </AnimatePresence>
                           </td>
                         </tr>
-                      </>
+                      </Fragment>
                     );
                   })
                 )}

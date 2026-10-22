@@ -13,6 +13,8 @@ export interface Property {
   titleStatus: string;
   flags: string[];
   notes: string;
+  rowId?: string; // database row id
+  own?: boolean; // true for records the visitor added
 }
 
 export interface CalculatedProperty extends Property {

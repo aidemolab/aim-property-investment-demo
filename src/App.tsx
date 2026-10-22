@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { 
-  getCalculatedProperties 
+  getCalculatedProperties, 
+  rawProperties 
 } from './data';
-import { CalculatedProperty } from './types';
+import { CalculatedProperty, Property } from './types';
 import { 
   Building, 
   Home, 
@@ -23,10 +24,53 @@ import {
   HelpCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useDemoRows, type Row } from './demoApi';
+import { DemoNote, DemoToolbar, RecordModal, ConfirmModal, OwnRowActions, OwnTag, type FieldDef } from './DemoUI';
+
+// ---- Live data: rows come from the database; the bundled sample rows are the offline fallback ----
+
+const FALLBACK_ROWS: Row[] = rawProperties.map((p) => ({
+  id: p.id, session_id: null, seed_key: p.id, created_at: '',
+  address: p.address, type: p.type, region: p.region, asking_price: p.askingPrice, estimated_market_value: p.estimatedMarketValue,
+  monthly_rent: p.monthlyRent, annual_service_charge: p.annualServiceCharge, annual_maintenance: p.annualMaintenance,
+  vacancy_risk: p.vacancyRisk, condition: p.condition, title_status: p.titleStatus, flags: p.flags, notes: p.notes,
+}));
+
+function propertyFromRow(r: Row): Property {
+  return {
+    id: r.seed_key ?? r.id, rowId: r.id, own: r.session_id !== null,
+    address: r.address, type: r.type, region: r.region, askingPrice: Number(r.asking_price), estimatedMarketValue: Number(r.estimated_market_value),
+    monthlyRent: Number(r.monthly_rent), annualServiceCharge: Number(r.annual_service_charge), annualMaintenance: Number(r.annual_maintenance),
+    vacancyRisk: r.vacancy_risk, condition: r.condition, titleStatus: r.title_status, flags: r.flags ?? [], notes: r.notes ?? '',
+  };
+}
+
+const PROPERTY_FLAG_OPTIONS = ['Above asking vs market', 'Requires refurbishment', 'High service charge', 'Short lease'];
+
+const PROPERTY_FIELDS: FieldDef[] = [
+  { key: 'address', label: 'Address (fictional)', type: 'text', maxLength: 80, wide: true, help: 'Use a made-up address, not a real property.' },
+  { key: 'type', label: 'Property type', type: 'select', options: ['Residential Terraced', 'Residential Apartment', 'Commercial Unit'] },
+  { key: 'region', label: 'Region', type: 'text', maxLength: 40 },
+  { key: 'asking_price', label: 'Asking price (£)', type: 'int', min: 1, max: 100000000 },
+  { key: 'estimated_market_value', label: 'Estimated market value (£)', type: 'int', min: 1, max: 100000000 },
+  { key: 'monthly_rent', label: 'Monthly rent (£)', type: 'int', min: 0, max: 1000000 },
+  { key: 'annual_service_charge', label: 'Annual service charge (£)', type: 'int', min: 0, max: 1000000 },
+  { key: 'annual_maintenance', label: 'Annual maintenance (£)', type: 'int', min: 0, max: 1000000 },
+  { key: 'vacancy_risk', label: 'Vacancy risk', type: 'select', options: ['Low', 'Medium', 'High'] },
+  { key: 'condition', label: 'Condition', type: 'select', options: ['Very Good', 'Good', 'Average', 'Poor'] },
+  { key: 'title_status', label: 'Title status', type: 'select', options: ['Freehold', 'Leasehold', 'Clean Leasehold', 'Short Lease'] },
+  { key: 'h_flags', label: 'Warnings (tick any that apply)', type: 'heading' },
+  ...PROPERTY_FLAG_OPTIONS.map((f): FieldDef => ({ key: 'flag:' + f, label: f, type: 'check' })),
+  { key: 'notes', label: 'Notes (optional)', type: 'textarea', maxLength: 400, required: false },
+];
+
+type FormState = { mode: 'add' } | { mode: 'edit'; property: CalculatedProperty } | { mode: 'delete'; property: CalculatedProperty } | null;
 
 export default function App() {
   // Load calculated property data
-  const initialProperties = useMemo(() => getCalculatedProperties(), []);
+  const demo = useDemoRows('properties', FALLBACK_ROWS);
+  const initialProperties = useMemo(() => getCalculatedProperties(demo.rows.map(propertyFromRow)), [demo.rows]);
+  const [form, setForm] = useState<FormState>(null);
 
   // Filter states
   const [selectedFilter, setSelectedFilter] = useState<'ALL' | 'GREEN' | 'YELLOW' | 'RED'>('ALL');
@@ -135,6 +179,7 @@ export default function App() {
 
   return (
     <div id="property-analysis-dashboard" className="bg-white text-[#0B1F33] font-sans antialiased">
+      <DemoNote status={demo.status} />
       {/* Container */}
       <div className="w-full max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         
@@ -154,7 +199,7 @@ export default function App() {
             <div className="self-start md:self-auto bg-[#f4f6f9] px-3.5 py-1.5 rounded-full border border-[#e2e8f0] flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></span>
               <span className="text-[11px] font-mono font-medium text-[#0B1F33]">
-                Illustrative data • Fictional properties
+                Live demo • Fictional properties
               </span>
             </div>
           </div>
@@ -237,6 +282,47 @@ export default function App() {
 
           </div>
         </header>
+
+        <div className="mb-6">
+          <DemoToolbar
+            addLabel="Add property"
+            onAdd={() => { demo.clearError(); setForm({ mode: 'add' }); }}
+            onReset={async () => { await demo.reset(); setExpandedId(null); }}
+            busy={demo.busy} canWrite={demo.canWrite} ownCount={demo.ownCount}
+            error={form ? '' : demo.error} onDismissError={demo.clearError}
+          />
+        </div>
+
+        {form && form.mode !== 'delete' && (
+          <RecordModal
+            title={form.mode === 'add' ? 'Add a property' : 'Edit property'}
+            submitLabel={form.mode === 'add' ? 'Add property' : 'Save changes'}
+            fields={PROPERTY_FIELDS}
+            initial={form.mode === 'edit'
+              ? { address: form.property.address, type: form.property.type, region: form.property.region, asking_price: form.property.askingPrice, estimated_market_value: form.property.estimatedMarketValue, monthly_rent: form.property.monthlyRent, annual_service_charge: form.property.annualServiceCharge, annual_maintenance: form.property.annualMaintenance, vacancy_risk: form.property.vacancyRisk, condition: form.property.condition, title_status: form.property.titleStatus, notes: form.property.notes, ...Object.fromEntries(PROPERTY_FLAG_OPTIONS.map((f) => ['flag:' + f, form.property.flags.includes(f)])) }
+              : { address: '', type: 'Residential Terraced', region: 'North West', asking_price: 150000, estimated_market_value: 155000, monthly_rent: 900, annual_service_charge: 0, annual_maintenance: 1200, vacancy_risk: 'Low', condition: 'Good', title_status: 'Freehold', notes: '' }}
+            busy={demo.busy} error={demo.error}
+            onClose={() => { demo.clearError(); setForm(null); }}
+            onSubmit={async (v) => {
+              const flags = PROPERTY_FLAG_OPTIONS.filter((f) => v['flag:' + f] === true);
+              const record: Record<string, unknown> = Object.fromEntries(Object.entries(v).filter(([k]) => !k.startsWith('flag:')));
+              record.flags = flags;
+              const saved = form.mode === 'edit' ? await demo.update(form.property.rowId!, record) : await demo.add(record);
+              if (saved) {
+                if (form.mode === 'add') { setExpandedId(saved.id); setCustomOffer(Number(saved.asking_price)); setCustomRent(Number(saved.monthly_rent)); }
+                else { setCustomOffer(Number(saved.asking_price)); setCustomRent(Number(saved.monthly_rent)); }
+                setForm(null);
+              }
+            }}
+          />
+        )}
+        {form && form.mode === 'delete' && (
+          <ConfirmModal
+            title="Delete this property?" text={`${form.property.address} will be removed from the demo. It cannot be undone.`} confirmLabel="Delete" busy={demo.busy}
+            onCancel={() => { demo.clearError(); setForm(null); }}
+            onConfirm={async () => { if (await demo.remove(form.property.rowId!)) { setExpandedId(null); setForm(null); } }}
+          />
+        )}
 
         {/* Filter and Control Bar */}
         <section id="filters-section" className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -389,7 +475,7 @@ export default function App() {
                           {/* Shortened Address */}
                           <td className="py-4 px-4">
                             <div className="font-semibold text-[13px] text-[#0B1F33]">
-                              {getShortenedAddress(p.address)}
+                              {getShortenedAddress(p.address)}<OwnTag own={Boolean(p.own)} />
                             </div>
                             <div className="text-[11px] text-[#6b7280]">
                               {p.region}
@@ -682,6 +768,12 @@ export default function App() {
                                         </p>
                                       </div>
 
+                                      <div className="mt-4 pt-3.5 border-t border-[#f4f6f9]">
+                                        <OwnRowActions own={Boolean(p.own)} busy={demo.busy}
+                                          onEdit={() => { demo.clearError(); setForm({ mode: 'edit', property: p }); }}
+                                          onDelete={() => { demo.clearError(); setForm({ mode: 'delete', property: p }); }} />
+                                      </div>
+
                                       {/* Display specific risks explanation */}
                                       <div className="mt-4 pt-3.5 border-t border-[#f4f6f9]">
                                         <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280] block mb-1.5">
@@ -700,11 +792,11 @@ export default function App() {
                                               if (flag === "Above asking vs market") {
                                                 explanation = `Overpaid premium of ${formatGBP(Math.abs(p.priceDiff))} reduces acquisition equity margin.`;
                                               } else if (flag === "Requires refurbishment") {
-                                                explanation = "Requires upfront CapEx of approx. £18,000 for kitchen/bathroom works.";
+                                                explanation = p.own ? "Budget for upfront refurbishment works before letting." : "Requires upfront CapEx of approx. £18,000 for kitchen/bathroom works.";
                                               } else if (flag === "High service charge") {
                                                 explanation = `Service charges of ${formatGBP(p.annualServiceCharge)} heavily tax the net rental income.`;
                                               } else if (flag === "Short lease") {
-                                                explanation = "Lease has only 74 years remaining. Requires £25k-£40k extension.";
+                                                explanation = p.own ? "A short lease may need an extension, which adds cost." : "Lease has only 74 years remaining. Requires £25k-£40k extension.";
                                               }
                                               return (
                                                 <div key={index} className="text-xs text-[#991b1b] flex items-start gap-1.5">
@@ -760,7 +852,7 @@ export default function App() {
                     {/* Header: Rank Badge & ID */}
                     <div className="flex justify-between items-center mb-3">
                       <span className="text-[10px] font-mono font-semibold bg-[#dcfce7] text-[#166534] px-2 py-0.5 rounded border border-[#86efac]">
-                        RANK {p.rank} • {p.id}
+                        RANK {p.rank} • {p.own ? 'YOURS' : p.id}
                       </span>
                       <span className="text-[10px] text-[#6b7280] font-semibold uppercase tracking-wider">
                         {p.type.split(' ')[0]}
@@ -788,7 +880,7 @@ export default function App() {
 
                   {/* One-sentence Advisor summary */}
                   <p className="text-[11px] text-[#0B1F33] leading-relaxed italic border-t border-[#f4f6f9] pt-3">
-                    "{getTopAdvisorSummary(p.id)}"
+                    "{getTopAdvisorSummary(p.id) || `${p.type} in ${p.region}: ${formatPercent(p.grossYield)} gross yield, ${formatPercent(p.netYield)} net yield.`}"
                   </p>
                 </div>
               );

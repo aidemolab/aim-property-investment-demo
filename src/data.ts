@@ -153,12 +153,25 @@ const getPropertyScore = (p: Property, grossYield: number, netAnnualProfit: numb
   return 'YELLOW';
 };
 
-export const getCalculatedProperties = (properties: Property[] = rawProperties): CalculatedProperty[] => {
+// What-if scenario (view only). Rent change and empty months alter the income; the mortgage (interest-only) adds
+// interest as a cost and shrinks the cash invested to the deposit. The existing score rules then run on the
+// scenario figures. With no mortgage, no rent change and no empty months the original numbers are used.
+export interface PropertyScenario { financed: boolean; rate: number; deposit: number; rentChange: number; emptyMonths: number }
+export const DEFAULT_PROPERTY_SCENARIO: PropertyScenario = { financed: false, rate: 5, deposit: 25, rentChange: 0, emptyMonths: 0 };
+export const isDefaultPropertyScenario = (s: PropertyScenario) => !s.financed && s.rentChange === 0 && s.emptyMonths === 0;
+
+export const getCalculatedProperties = (properties: Property[] = rawProperties, scn?: PropertyScenario): CalculatedProperty[] => {
+  const on = Boolean(scn) && !isDefaultPropertyScenario(scn!);
   const calculated = properties.map((p) => {
-    const grossAnnualRent = p.monthlyRent * 12;
+    const rent = on ? p.monthlyRent * (1 + scn!.rentChange / 100) : p.monthlyRent;
+    const grossAnnualRent = rent * (on ? 12 - scn!.emptyMonths : 12);
     const grossYield = Math.round((grossAnnualRent / p.askingPrice) * 10000) / 100;
     const annualCosts = p.annualServiceCharge + p.annualMaintenance;
-    const netAnnualProfit = Math.round(grossAnnualRent - annualCosts);
+    const annualInterest = on && scn!.financed ? Math.round(p.askingPrice * (1 - scn!.deposit / 100) * (scn!.rate / 100)) : 0;
+    const netAnnualProfit = Math.round(grossAnnualRent - annualCosts - annualInterest);
+    const cashInvested = on && scn!.financed ? p.askingPrice * (scn!.deposit / 100) : p.askingPrice;
+    const roi = Math.round((netAnnualProfit / cashInvested) * 10000) / 100;
+    const monthlyCashFlow = Math.round(netAnnualProfit / 12);
     const netYield = Math.round((netAnnualProfit / p.askingPrice) * 10000) / 100;
     const priceDiff = p.askingPrice - p.estimatedMarketValue;
     const score = getPropertyScore(p, grossYield, netAnnualProfit);
@@ -172,6 +185,9 @@ export const getCalculatedProperties = (properties: Property[] = rawProperties):
       netAnnualProfit,
       netYield,
       priceDiff,
+      annualInterest,
+      monthlyCashFlow,
+      roi,
       score,
       advisorRecommendation,
       rank: 0 // Will be set after sorting

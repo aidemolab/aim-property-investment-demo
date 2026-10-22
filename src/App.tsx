@@ -101,7 +101,7 @@ export default function App() {
     };
   }, [expandedProperty, customOffer, customRent]);
 
-  // Address Shortener Helper: "14 Hartley Road, Manchester" -> "Hartley Road, Manchester"
+  // Address Shortener Helper: "14 Specimen Road, Manchester" -> "Specimen Road, Manchester"
   const getShortenedAddress = (address: string) => {
     return address.replace(/^(?:\d+\s+|Apt\s+\d+\s+|Unit\s+\d+\s+|Flat\s+\d+\s+)/i, '');
   };
@@ -134,7 +134,7 @@ export default function App() {
   };
 
   return (
-    <div id="property-analysis-dashboard" className="min-h-screen bg-white text-[#1a1d27] font-sans antialiased">
+    <div id="property-analysis-dashboard" className="bg-white text-[#0B1F33] font-sans antialiased">
       {/* Container */}
       <div className="w-full max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         
@@ -142,19 +142,19 @@ export default function App() {
         <header id="dashboard-header" className="mb-8 border-b border-[#e2e8f0] pb-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 id="dashboard-title" className="text-3xl font-semibold tracking-tight text-[#1a1d27]">
+              <h1 id="dashboard-title" className="text-3xl font-semibold tracking-tight text-[#0B1F33]">
                 Property Investment Analysis Dashboard
               </h1>
               <p id="dashboard-subtitle" className="text-sm text-[#6b7280] mt-1">
-                AI-powered portfolio scoring, dynamic yield modeler, and opportunity ranking engine
+                Rule-based portfolio scoring, dynamic yield modeler and opportunity ranking
               </p>
             </div>
             
             {/* Timestamp Badge */}
             <div className="self-start md:self-auto bg-[#f4f6f9] px-3.5 py-1.5 rounded-full border border-[#e2e8f0] flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#3b82f6] animate-pulse"></span>
-              <span className="text-[11px] font-mono font-medium text-[#1a1d27]">
-                PORTFOLIO ACTIVE • UK REGIONS
+              <span className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></span>
+              <span className="text-[11px] font-mono font-medium text-[#0B1F33]">
+                Illustrative data • Fictional properties
               </span>
             </div>
           </div>
@@ -168,13 +168,13 @@ export default function App() {
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">
                   Portfolio Analysed
                 </span>
-                <div className="text-2xl sm:text-3xl font-bold text-[#1a1d27] mt-1">
+                <div className="text-2xl sm:text-3xl font-bold text-[#0B1F33] mt-1">
                   {counts.total}
                 </div>
                 <p className="text-[11px] text-[#6b7280] mt-1">Mixed Residential/Commercial</p>
               </div>
               <div className="bg-white p-2.5 rounded-lg border border-[#e2e8f0]">
-                <Building className="w-5 h-5 text-[#3b82f6]" />
+                <Building className="w-5 h-5 text-[#2563EB]" />
               </div>
             </div>
 
@@ -187,7 +187,7 @@ export default function App() {
                 <div className="text-2xl sm:text-3xl font-bold text-[#166534] mt-1 flex items-baseline gap-2">
                   {counts.green}
                   <span className="text-xs font-normal text-[#166534] bg-[#dcfce7] px-2 py-0.5 rounded-full border border-[#86efac]">
-                    Active Buy
+                    Buy signal
                   </span>
                 </div>
                 <p className="text-[11px] text-[#6b7280] mt-1">Highest yield, zero complications</p>
@@ -250,8 +250,8 @@ export default function App() {
                 onClick={() => setSelectedFilter('ALL')}
                 className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer ${
                   selectedFilter === 'ALL'
-                    ? 'bg-[#3b82f6] text-white border-[#3b82f6] shadow-sm'
-                    : 'bg-[#f4f6f9] text-[#1a1d27] border-[#e2e8f0] hover:bg-[#e2e8f0]'
+                    ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-sm'
+                    : 'bg-[#f4f6f9] text-[#0B1F33] border-[#e2e8f0] hover:bg-[#e2e8f0]'
                 }`}
               >
                 All Properties ({counts.total})
@@ -262,8 +262,8 @@ export default function App() {
                 onClick={() => setSelectedFilter('GREEN')}
                 className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer ${
                   selectedFilter === 'GREEN'
-                    ? 'bg-[#3b82f6] text-white border-[#3b82f6] shadow-sm'
-                    : 'bg-[#f4f6f9] text-[#1a1d27] border-[#e2e8f0] hover:bg-[#e2e8f0]'
+                    ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-sm'
+                    : 'bg-[#f4f6f9] text-[#0B1F33] border-[#e2e8f0] hover:bg-[#e2e8f0]'
                 }`}
               >
                 <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#166534] mr-1.5 align-middle"></span>
@@ -275,8 +275,8 @@ export default function App() {
                 onClick={() => setSelectedFilter('YELLOW')}
                 className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer ${
                   selectedFilter === 'YELLOW'
-                    ? 'bg-[#3b82f6] text-white border-[#3b82f6] shadow-sm'
-                    : 'bg-[#f4f6f9] text-[#1a1d27] border-[#e2e8f0] hover:bg-[#e2e8f0]'
+                    ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-sm'
+                    : 'bg-[#f4f6f9] text-[#0B1F33] border-[#e2e8f0] hover:bg-[#e2e8f0]'
                 }`}
               >
                 <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#854d0e] mr-1.5 align-middle"></span>
@@ -288,8 +288,8 @@ export default function App() {
                 onClick={() => setSelectedFilter('RED')}
                 className={`px-4 py-2 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer ${
                   selectedFilter === 'RED'
-                    ? 'bg-[#3b82f6] text-white border-[#3b82f6] shadow-sm'
-                    : 'bg-[#f4f6f9] text-[#1a1d27] border-[#e2e8f0] hover:bg-[#e2e8f0]'
+                    ? 'bg-[#2563EB] text-white border-[#2563EB] shadow-sm'
+                    : 'bg-[#f4f6f9] text-[#0B1F33] border-[#e2e8f0] hover:bg-[#e2e8f0]'
                 }`}
               >
                 <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#991b1b] mr-1.5 align-middle"></span>
@@ -299,7 +299,7 @@ export default function App() {
           </div>
 
           <div className="text-[11px] text-[#6b7280] bg-[#f4f6f9] border border-[#e2e8f0] px-3.5 py-2 rounded-lg self-stretch sm:self-auto flex items-center justify-center gap-1.5">
-            <Info className="w-3.5 h-3.5 text-[#3b82f6]" />
+            <Info className="w-3.5 h-3.5 text-[#2563EB]" />
             <span>Click any row to open dynamic cash flow modeler</span>
           </div>
         </section>
@@ -376,19 +376,19 @@ export default function App() {
                           key={p.id}
                           onClick={() => handleRowClick(p.id)}
                           className={`hover:bg-[#f0f4ff] transition-all cursor-pointer ${
-                            isExpanded ? 'bg-[#f0f4ff]/70 font-medium border-l-4 border-l-[#3b82f6]' : 'bg-white'
+                            isExpanded ? 'bg-[#f0f4ff]/70 font-medium border-l-4 border-l-[#2563EB]' : 'bg-white'
                           }`}
                         >
                           {/* Rank */}
                           <td className="py-4 px-4 text-center">
-                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#f4f6f9] text-[#1a1d27] font-semibold text-xs border border-[#e2e8f0]">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#f4f6f9] text-[#0B1F33] font-semibold text-xs border border-[#e2e8f0]">
                               {p.rank}
                             </span>
                           </td>
 
                           {/* Shortened Address */}
                           <td className="py-4 px-4">
-                            <div className="font-semibold text-[13px] text-[#1a1d27]">
+                            <div className="font-semibold text-[13px] text-[#0B1F33]">
                               {getShortenedAddress(p.address)}
                             </div>
                             <div className="text-[11px] text-[#6b7280]">
@@ -397,12 +397,12 @@ export default function App() {
                           </td>
 
                           {/* Type */}
-                          <td className="py-4 px-3 text-[13px] text-[#1a1d27]">
+                          <td className="py-4 px-3 text-[13px] text-[#0B1F33]">
                             <div className="flex items-center gap-1.5">
                               {p.type.includes('Commercial') ? (
-                                <Building className="w-3.5 h-3.5 text-[#3b82f6]" />
+                                <Building className="w-3.5 h-3.5 text-[#2563EB]" />
                               ) : (
-                                <Home className="w-3.5 h-3.5 text-[#3b82f6]" />
+                                <Home className="w-3.5 h-3.5 text-[#2563EB]" />
                               )}
                               <span>{p.type.split(' ')[0]}</span>
                             </div>
@@ -416,7 +416,7 @@ export default function App() {
                           </td>
 
                           {/* Asking Price */}
-                          <td className="py-4 px-4 text-right font-semibold text-[13px] text-[#1a1d27]">
+                          <td className="py-4 px-4 text-right font-semibold text-[13px] text-[#0B1F33]">
                             {formatGBP(p.askingPrice)}
                           </td>
 
@@ -440,17 +440,17 @@ export default function App() {
                           </td>
 
                           {/* Gross Yield */}
-                          <td className="py-4 px-3 text-right font-mono font-medium text-[13px] text-[#1a1d27]">
+                          <td className="py-4 px-3 text-right font-mono font-medium text-[13px] text-[#0B1F33]">
                             {formatPercent(p.grossYield)}
                           </td>
 
                           {/* Net Yield */}
-                          <td className="py-4 px-3 text-right font-mono font-medium text-[13px] text-[#1a1d27]">
+                          <td className="py-4 px-3 text-right font-mono font-medium text-[13px] text-[#0B1F33]">
                             {formatPercent(p.netYield)}
                           </td>
 
                           {/* Net Annual Profit */}
-                          <td className="py-4 px-4 text-right font-semibold text-[13px] text-[#1a1d27]">
+                          <td className="py-4 px-4 text-right font-semibold text-[13px] text-[#0B1F33]">
                             {formatGBP(p.netAnnualProfit)}
                             <span className="text-[10px] text-[#6b7280] font-normal block">/ yr</span>
                           </td>
@@ -494,12 +494,12 @@ export default function App() {
                                   transition={{ duration: 0.25, ease: "easeInOut" }}
                                   className="overflow-hidden bg-[#f4f6f9] border-t border-b border-[#e2e8f0]"
                                 >
-                                  <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 text-[#1a1d27]">
+                                  <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 text-[#0B1F33]">
                                     
                                     {/* Left Panel: Specifications */}
                                     <div className="lg:col-span-4 bg-white p-5 rounded-xl border border-[#e2e8f0]">
-                                      <h3 className="text-sm font-semibold mb-4 text-[#1a1d27] border-b border-[#f4f6f9] pb-2 flex items-center gap-2">
-                                        <Building className="w-4 h-4 text-[#3b82f6]" />
+                                      <h3 className="text-sm font-semibold mb-4 text-[#0B1F33] border-b border-[#f4f6f9] pb-2 flex items-center gap-2">
+                                        <Building className="w-4 h-4 text-[#2563EB]" />
                                         Property Specifications
                                       </h3>
                                       
@@ -561,8 +561,8 @@ export default function App() {
                                     {/* Middle Panel: Dynamic Modeler */}
                                     <div className="lg:col-span-4 bg-white p-5 rounded-xl border border-[#e2e8f0]">
                                       <div className="flex justify-between items-center mb-4 border-b border-[#f4f6f9] pb-2">
-                                        <h3 className="text-sm font-semibold text-[#1a1d27] flex items-center gap-2">
-                                          <Sliders className="w-4 h-4 text-[#3b82f6]" />
+                                        <h3 className="text-sm font-semibold text-[#0B1F33] flex items-center gap-2">
+                                          <Sliders className="w-4 h-4 text-[#2563EB]" />
                                           Dynamic Yield Modeler
                                         </h3>
                                         <button 
@@ -572,7 +572,7 @@ export default function App() {
                                             setCustomOffer(p.askingPrice);
                                             setCustomRent(p.monthlyRent);
                                           }}
-                                          className="text-[#6b7280] hover:text-[#3b82f6] p-1 rounded hover:bg-[#f4f6f9] cursor-pointer"
+                                          className="text-[#6b7280] hover:text-[#2563EB] p-1 rounded hover:bg-[#f4f6f9] cursor-pointer"
                                         >
                                           <span className="text-[10px] font-mono font-medium flex items-center gap-1">
                                             RESET
@@ -589,7 +589,7 @@ export default function App() {
                                         <div>
                                           <div className="flex justify-between text-xs mb-1.5">
                                             <span className="text-[#6b7280] font-medium">Custom Offer Price</span>
-                                            <span className="font-bold text-[#3b82f6]">{formatGBP(customOffer)}</span>
+                                            <span className="font-bold text-[#2563EB]">{formatGBP(customOffer)}</span>
                                           </div>
                                           <input 
                                             type="range"
@@ -598,7 +598,7 @@ export default function App() {
                                             step={1000}
                                             value={customOffer}
                                             onChange={(e) => setCustomOffer(Number(e.target.value))}
-                                            className="w-full accent-[#3b82f6] h-1.5 bg-[#e2e8f0] rounded-lg cursor-pointer"
+                                            className="w-full accent-[#2563EB] h-1.5 bg-[#e2e8f0] rounded-lg cursor-pointer"
                                           />
                                           <div className="flex justify-between text-[9px] text-[#6b7280] font-mono mt-1">
                                             <span>Min: {formatGBP(p.askingPrice * 0.7)}</span>
@@ -610,7 +610,7 @@ export default function App() {
                                         <div>
                                           <div className="flex justify-between text-xs mb-1.5">
                                             <span className="text-[#6b7280] font-medium">Custom Monthly Rent</span>
-                                            <span className="font-bold text-[#3b82f6]">{formatGBP(customRent)}</span>
+                                            <span className="font-bold text-[#2563EB]">{formatGBP(customRent)}</span>
                                           </div>
                                           <input 
                                             type="range"
@@ -619,7 +619,7 @@ export default function App() {
                                             step={20}
                                             value={customRent}
                                             onChange={(e) => setCustomRent(Number(e.target.value))}
-                                            className="w-full accent-[#3b82f6] h-1.5 bg-[#e2e8f0] rounded-lg cursor-pointer"
+                                            className="w-full accent-[#2563EB] h-1.5 bg-[#e2e8f0] rounded-lg cursor-pointer"
                                           />
                                           <div className="flex justify-between text-[9px] text-[#6b7280] font-mono mt-1">
                                             <span>Min: {formatGBP(p.monthlyRent * 0.6)}</span>
@@ -634,7 +634,7 @@ export default function App() {
                                               <span className="text-[10px] text-[#6b7280] uppercase tracking-wide block font-medium">
                                                 Net Profit
                                               </span>
-                                              <span className="text-xs font-bold text-[#1a1d27]">
+                                              <span className="text-xs font-bold text-[#0B1F33]">
                                                 {formatGBP(scenarioResults.netAnnualProfit)}
                                               </span>
                                             </div>
@@ -642,7 +642,7 @@ export default function App() {
                                               <span className="text-[10px] text-[#6b7280] uppercase tracking-wide block font-medium">
                                                 Gross Yield
                                               </span>
-                                              <span className="text-xs font-mono font-bold text-[#1a1d27]">
+                                              <span className="text-xs font-mono font-bold text-[#0B1F33]">
                                                 {formatPercent(scenarioResults.grossYield)}
                                               </span>
                                             </div>
@@ -650,7 +650,7 @@ export default function App() {
                                               <span className="text-[10px] text-[#6b7280] uppercase tracking-wide block font-medium">
                                                 Net Yield
                                               </span>
-                                              <span className="text-xs font-mono font-bold text-[#3b82f6]">
+                                              <span className="text-xs font-mono font-bold text-[#2563EB]">
                                                 {formatPercent(scenarioResults.netYield)}
                                               </span>
                                             </div>
@@ -659,11 +659,11 @@ export default function App() {
                                       </div>
                                     </div>
 
-                                    {/* Right Panel: Risk Flags & AI Recommendations */}
+                                    {/* Right Panel: Risk Flags & Recommendations */}
                                     <div className="lg:col-span-4 bg-white p-5 rounded-xl border border-[#e2e8f0] flex flex-col justify-between">
                                       <div>
-                                        <h3 className="text-sm font-semibold mb-3.5 text-[#1a1d27] border-b border-[#f4f6f9] pb-2 flex items-center gap-2">
-                                          <Sparkles className="w-4 h-4 text-[#3b82f6]" />
+                                        <h3 className="text-sm font-semibold mb-3.5 text-[#0B1F33] border-b border-[#f4f6f9] pb-2 flex items-center gap-2">
+                                          <Sparkles className="w-4 h-4 text-[#2563EB]" />
                                           Advisor Recommendation
                                         </h3>
                                         
@@ -677,7 +677,7 @@ export default function App() {
                                           </span>
                                         </div>
 
-                                        <p className="text-xs text-[#1a1d27] leading-relaxed italic">
+                                        <p className="text-xs text-[#0B1F33] leading-relaxed italic">
                                           "{p.advisorRecommendation}"
                                         </p>
                                       </div>
@@ -738,15 +738,15 @@ export default function App() {
         {/* Top Opportunities Panel - Appears below table */}
         <section id="top-opportunities-panel" className="bg-[#f4f6f9] border border-[#e2e8f0] rounded-xl p-6">
           <div className="flex items-center gap-2 mb-4 border-b border-[#e2e8f0] pb-3">
-            <Award className="w-5 h-5 text-[#3b82f6]" />
-            <h2 id="top-opportunities-heading" className="text-lg font-semibold text-[#1a1d27]">
+            <Award className="w-5 h-5 text-[#2563EB]" />
+            <h2 id="top-opportunities-heading" className="text-lg font-semibold text-[#0B1F33]">
               Strongest Investment Opportunities (Top buy-rated assets)
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {topOpportunities.map((p) => {
-              // Create shortened address: "Unit 4 Parkside Business Centre Birmingham" -> "Parkside Business Centre, Birmingham"
+              // Create shortened address: "Unit 4 Example Business Centre Birmingham" -> "Example Business Centre, Birmingham"
               const shortened = getShortenedAddress(p.address);
 
               return (
@@ -754,7 +754,7 @@ export default function App() {
                   key={p.id}
                   id={`top-opp-card-${p.id}`}
                   onClick={() => handleRowClick(p.id)}
-                  className="bg-white p-5 rounded-lg border border-[#e2e8f0] hover:border-[#3b82f6] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+                  className="bg-white p-5 rounded-lg border border-[#e2e8f0] hover:border-[#2563EB] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
                 >
                   <div>
                     {/* Header: Rank Badge & ID */}
@@ -768,7 +768,7 @@ export default function App() {
                     </div>
 
                     {/* Address & Region */}
-                    <h3 className="font-semibold text-sm text-[#1a1d27] tracking-tight truncate" title={shortened}>
+                    <h3 className="font-semibold text-sm text-[#0B1F33] tracking-tight truncate" title={shortened}>
                       {shortened}
                     </h3>
                     <p className="text-[11px] text-[#6b7280]">{p.region}</p>
@@ -777,7 +777,7 @@ export default function App() {
                     <div className="grid grid-cols-2 gap-3 my-4 bg-[#f4f6f9] p-3 rounded-lg border border-[#e2e8f0]">
                       <div>
                         <span className="text-[10px] uppercase text-[#6b7280] block font-medium">Gross Yield</span>
-                        <span className="text-sm font-bold font-mono text-[#1a1d27]">{formatPercent(p.grossYield)}</span>
+                        <span className="text-sm font-bold font-mono text-[#0B1F33]">{formatPercent(p.grossYield)}</span>
                       </div>
                       <div>
                         <span className="text-[10px] uppercase text-[#6b7280] block font-medium">Net Profit</span>
@@ -787,7 +787,7 @@ export default function App() {
                   </div>
 
                   {/* One-sentence Advisor summary */}
-                  <p className="text-[11px] text-[#1a1d27] leading-relaxed italic border-t border-[#f4f6f9] pt-3">
+                  <p className="text-[11px] text-[#0B1F33] leading-relaxed italic border-t border-[#f4f6f9] pt-3">
                     "{getTopAdvisorSummary(p.id)}"
                   </p>
                 </div>

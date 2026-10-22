@@ -1,6 +1,5 @@
 {
   "name": "Property Investment Analysis Dashboard",
-  "description": "An interactive property investment analysis and portfolio scoring dashboard with yield calculations and opportunity rankings.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "description": "Illustrative property investment analysis dashboard from AIM Smart Solutions. Fictional properties and demonstration data. Not investment advice.",
+  "requestFramePermissions": []
 }

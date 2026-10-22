@@ -220,14 +220,6 @@ export default function App() {
                 Rule-based portfolio scoring, dynamic yield modeler and opportunity ranking
               </p>
             </div>
-            
-            {/* Timestamp Badge */}
-            <div className="self-start md:self-auto bg-[#f4f6f9] px-3.5 py-1.5 rounded-full border border-[#e2e8f0] flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#2563EB] animate-pulse"></span>
-              <span className="text-[11px] font-mono font-medium text-[#0B1F33]">
-                Live demo • Fictional properties
-              </span>
-            </div>
           </div>
 
           {/* Summary KPI Panel - 4 Cards in Row */}
